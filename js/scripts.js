@@ -1,5 +1,6 @@
 const gallery = document.getElementById('gallery');
 const body = document.getElementsByTagName('body')[0];
+const searchContainer= document.querySelector('.search-container');
 
 
 // ------------------------------------------
@@ -16,7 +17,10 @@ function fetchData(url) {
 fetchData('https://randomuser.me/api/?results=12&seed&nat=ca,us,fr,gb,&lego')
     .then(data => { generateCard(data.results);
                     modalClickHandler(data.results);
-                    generateFilter();
+                    searchBar();
+                    SearchBarEventListenerClick();
+                    SearchBarEventListenerKeyUp();
+                    searchFilter();
     })
 
 
@@ -36,16 +40,92 @@ function checkStatus(response){
 }
 
 
-function generateFilter(){
-    const searchContainer = document.getElementsByClassName("search-container")[0];
-    const searchInput =document.createElement('div');
-    searchInput.innerHTML = `
-        <form action="#" method="get">
-            <input type="search" id="search-input" class="search-input" placeholder="Search...">
-            <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
-        </form>`;
-searchContainer.appendChild(searchInput);
-}
+ /*---------------------------------------
+                Search bar
+  ---------------------------------------*/
+
+  function searchBar() {
+    const searchHTML = document.createElement('div');
+
+    searchHTML.innerHTML = `
+    <form action="#" method="get">
+      <input type="search" id="search-input" class="search-input" placeholder="Search...">
+      <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+    </form>`;
+    searchContainer.appendChild(searchHTML);
+  }
+
+
+   /*---------------------------------------
+           Search filter
+  ---------------------------------------*/
+
+  function searchFilter (e) {
+    const searchInput = document.querySelector('#search-input');
+    const cards = document.querySelectorAll('div.card');   
+  
+    // No results FOund
+    const noResultsHTML = document.createElement('div');
+    noResultsHTML.classList.add('no-results');
+    noResultsHTML.innerHTML = 
+    `
+    <div class="res">
+      <h1> No Reults found of </h1>
+    </div>
+    `;
+    body.insertBefore(noResultsHTML, gallery);
+    noResultsHTML.style.display = 'none';
+
+    // Add Event Listener For search
+      e.preventDefault();
+      const searchInputText = searchInput.value.toUpperCase();
+      let noFoundMessage = false;
+
+      // SeachFilter from ---> https://www.w3schools.com/howto/howto_js_filter_lists.asp
+      for(let i =0; i < cards.length; i++){ 
+        let h3 = cards[i].getElementsByTagName('h3')[0];
+        let  txtValue = h3.textContent;
+        if (txtValue.toUpperCase().indexOf(searchInputText) > -1){
+          cards[i].style.display = '';
+          lnoFoundMessage = false;
+        } else {
+          cards[i].style.display = 'none'; 
+          noFoundMessage = true;
+        }
+      }
+
+      if (noFoundMessage) {
+        noResultsHTML.style.display = '';
+      } else {
+        noResultsHTML.style.display = 'none';
+      }
+  }
+
+
+  
+
+ /*---------------------------------------
+           Search function On Click
+  ---------------------------------------*/
+
+  function SearchBarEventListenerClick () {
+    const button = document.getElementById('search-submit');
+    button.addEventListener('click', (e) => {
+      searchFilter(e);
+    });
+  }
+
+
+ /*---------------------------------------
+        Search function On KeyUp
+  ---------------------------------------*/
+
+  function SearchBarEventListenerKeyUp () {
+    const searchInput = document.querySelector('#search-input');
+    searchInput.addEventListener('keyup', (e) => {
+      searchFilter(e);
+    });
+  }
 
 
 //generate individual employee cards based on number on employees return from API
@@ -134,3 +214,4 @@ function closeModal(){
             modalContainer.remove();
         }
     });
+
